@@ -1,9 +1,11 @@
-import React from 'react'
-import { useDispatch, useSelector } from 'react-redux';
+import React from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
+import { itemsActions } from "../store/itemsSlice";
+import { fetchStatusActions } from "../store/fetchStatusSlice";
 
 const FetchItems = () => {
-  const fetchStatus =  useSelector((store) => store.fetchStatus);
+  const fetchStatus = useSelector((store) => store.fetchStatus);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -11,12 +13,13 @@ const FetchItems = () => {
 
     const controller = new AbortController();
     const signal = controller.signal;
-
-    
-    fetch("https://congenial-meme-x55g54p9j4g73pq99-8080.app.github.dev/", { signal })
+    dispatch(fetchStatusActions.markFetchingStarted());
+    fetch("http://localhost:8080/items", { signal })
       .then((res) => res.json())
       .then(({ items }) => {
-        console.log("Items Fetched", items);
+        dispatch(fetchStatusActions.markFetchDone());
+        dispatch(fetchStatusActions.markFetchingFinished());
+        dispatch(itemsActions.addInitialItems(items));
       });
 
     return () => {
@@ -24,13 +27,7 @@ const FetchItems = () => {
     };
   }, [fetchStatus]);
 
-  return <>
-    <div>
-      Fetch Done: {fetchStatus.fetchDone}
-      currently Fetching: {fetchStatus.currentFetching}
-    </div>
-  </>
-  
-}
+  return <></>;
+};
 
-export default FetchItems
+export default FetchItems;
